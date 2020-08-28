@@ -17,6 +17,7 @@ extern "C" {
 #endif
 
 #include "LaOSconfig.h"
+#define NDEBUG
 
 #ifdef LINUX_TERMINAL
     #define NORM     "\x1B[0m"  //normal
@@ -44,12 +45,14 @@ extern "C" {
     #define BLINK    ""
 #endif
 
-#ifndef NDEBUG
-# define PRINTF(text, ...)   printf(text, ##__VA_ARGS__)
 # define __FILE_NAME__                                                      \
                     (strrchr(__FILE__, '/') ?                               \
                                             strrchr(__FILE__, '/') + 1 :    \
                                             __FILE__)
+
+#ifndef NDEBUG
+# define PRINTF(text, ...)   printf(text, ##__VA_ARGS__)
+
 /* Extended version */
 # define PRINTF_EXT(color, text, ...)                                   \
         printf(color "%-20.20s %-20.20s #%-5i: " text "" NORM,          \
@@ -58,6 +61,15 @@ extern "C" {
 
 # define PRINTF_COL(color, text, ...)                                   \
         printf(color "" text "" NORM, ##__VA_ARGS__);
+
+# define PRINT_COND(condition, color, text, ... )                       \
+        if (condition) { printf(color "" text "" NORM, ##__VA_ARGS__); }
+
+#else
+# define PRINTF(text, ...)
+# define PRINTF_EXT(color, text, ...)
+# define PRINT_COND(condition, color, text, ... )
+#endif
 
 # define PRINT_ERR(text, ...)                                           \
         printf(RED "%-20.20s %-20.20s #%-5i: ERROR: " text "" NORM,     \
@@ -69,12 +81,6 @@ extern "C" {
                __FILE_NAME__, __FUNCTION__, __LINE__,                   \
                ##__VA_ARGS__);
 
-# define PRINT_COND(condition, color, text, ... )                       \
-        if (condition) { printf(color "" text "" NORM, ##__VA_ARGS__); }
-#else
-# define PRINTF(color, text, ...)
-# define PRINTF_EXT(color, text, ...)
-#endif
 
 /*--- Function prototypes ---*/
 void debug(const char * msg);

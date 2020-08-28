@@ -1,4 +1,5 @@
 #include "core.hpp"
+#include "debug.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,7 +14,23 @@ extern "C" {
  */
 __weak void SVC_Handler_C(uint32_t svc_num)
 {
-	printf("SVC exception number : %lu", svc_num);
+//	PRINTF("SVC exception number : %lu", svc_num);
+	switch(svc_num)
+	{
+	    case 0:
+	    {
+	        __asm__ volatile (
+	                "mrs r1, control  \n"
+	                "bic r1, #1       \n"
+	                "msr control, r1  \n"
+	                :
+	                :
+	                :"r1");
+	        break;
+	    }
+	    default:
+	        break;
+	}
 }
 
 #ifdef __cplusplus

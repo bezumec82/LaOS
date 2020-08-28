@@ -134,10 +134,16 @@ void Yield()
 void Core::Start()
 {
 #if (USE_WATCHDOG)
+    /* Watchdog must be configured before MPU.
+     * In other case it doesn't work - silicone BUG? */
     ConfigWDG();
 #endif
 
-#if ( (USE_SYSTICK) && (EVENT_DRIVEN_SYSTEM) )
+#if (USE_SYSTICK)
+# if (PREEMPTIVE_SWITCH)
+    NVIC_SetPriority(PendSV_IRQn, 0xFF); // Set PendSV to lowest possible priority
+# endif
+
     uint32_t ticks = (SystemCoreClock / 1000) * SYSTICK_PERIOD_MS;
     if( SysTick_Config(ticks) )
     {
@@ -148,7 +154,6 @@ void Core::Start()
         return;
     }
 #endif
-
     ConfigMPU();
     asmStart((void *)&head);
 }
@@ -159,6 +164,7 @@ void Core::Supervisor(Core * instance)
 #if (USE_WATCHDOG)
     instance->KickDog();
 #endif
+
 #if(STATIC_STACK_PROTECTION)
     /* Check stack protection here*/
     instance->CheckStack();
@@ -190,7 +196,7 @@ void Core::CheckStack()
             (THREAD_STACK_SIZE_WORDS  + PROTECTION_ZONE_WORDS) * \
                 context->threadNumber ] != PROTECTION_WORD )
         {
-            PRINT_ERR("\r\nStack overflow in : '%s'\r\n", context->name);
+            PRINT_ERR("Stack overflow in : '%s'\r\n", context->name);
             /* This disables all changes in stack
              * and restore protection symbols */
             PrepareStack(*context);
@@ -200,7 +206,7 @@ void Core::CheckStack()
             (THREAD_STACK_SIZE_WORDS  + PROTECTION_ZONE_WORDS) * \
                 context->threadNumber + context->stackSize] != PROTECTION_WORD )
         {
-            PRINT_ERR("\r\nStack corrosion in : %s\r\n", context->name);
+            PRINT_ERR("Stack corrosion in : %s\r\n", context->name);
             PrepareStack(*context); //whose stack was corroded
             if(context->next != &head)
                 PrepareStack(*context->next); //who corroded stack

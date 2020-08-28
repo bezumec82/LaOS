@@ -19,9 +19,10 @@ asmYield:
 
         stmdb sp!, {r2}             //save control - last to stack
 
-        /* Check current control - switch to privileged */
+        /* Check current control -
+         * switch to privileged through svc #0 */
         tst r2, #1  //test bit 1
-        it ne       //if 1 (Z clear) == un-priveleged
+        it ne       //if 1 (Z clear) == current mode is un-priveleged
         svcne #0    //change to priveleged
 
         ldr r3, [r0]    //dereference &context to context
@@ -34,10 +35,9 @@ asmYield:
                         //now context is the next context
 
         /* restore control - first from stack */
-        ldr r3, [r0]    //dereference context to stack pointer
-        ldr r3, [r3]    //dereference stack pointer to value
-                        //last value on stack was control
-
+        ldr r3, [r0]    	//dereference context to stack pointer
+        ldr r3, [r3]    	//dereference stack pointer to value
+                        	//last value on stack was control
                             //r3 contains control taken from stack
         msr control, r3     //restore control taken from stack
         isb
@@ -48,8 +48,7 @@ asmYield:
         tst r3, #0x4                //test bit 3 - Floating Point Context Active
         it ne                       //if 1
         vldmiane sp!, {s16-s31}     //restore FPU registers
-
-        ldmia sp!, {r4-r11, pc}     //continue execution of new context
+        ldmia sp!, {r4-r11, pc}     //go directly to the new context
 
 .global asmStart
 .type asmStart, %function
@@ -73,6 +72,10 @@ asmStart:
         ldmia sp!, {r3}             //dummy read
         ldmia sp!, {r4-r11, pc}     //switch to the head's context
 
+
+svcRet:
+	.word svcRet
+
 .global SVC_Handler
 .type SVC_Handler, %function
 SVC_Handler:
@@ -95,14 +98,15 @@ SVC_Handler:
         ldr r0, [r0, #24]
         ldrb r0, [r0, #-2]  //Get first byte of the SVC instruction
                             //now the SVC number is in R0
+        ldr r1, =svcRet
+        str lr, [r1]
 
-        /* SVC==0 -> change priority to priveleged */
-        cmp r0, #0
-        ittte eq
-        mrseq r1, control   //read control
-        biceq r1, #1        //clear bit 0
-        msreq control, r1   //write control
-        bne SVC_Handler_C   //other codes handle in 'C'
+        bl SVC_Handler_C    //handle in 'C'
+
+        ldr r1, =svcRet
+        ldr lr, [r1]
+
+        bx lr
+
         .align 4
-
 

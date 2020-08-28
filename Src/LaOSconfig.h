@@ -10,9 +10,18 @@
 
 /* To put system in sleep - event driven system.
  * Incompatible with stepped debug. */
-# define EVENT_DRIVEN_SYSTEM                false
+
 # define USE_SYSTICK                        true
+#if(USE_SYSTICK)
 # define SYSTICK_PERIOD_MS                  10
+# define PREEMPTIVE_SWITCH                  false
+# define EVENT_DRIVEN_SYSTEM                false
+
+#  if(PREEMPTIVE_SWITCH)&&(EVENT_DRIVEN_SYSTEM)
+#  error "Preemptive switching and event driven system are incompatible."
+#  endif
+
+# endif
 
 # define STATIC_STACK_PROTECTION            true
 # define THREAD_STACK_SIZE_WORDS            256

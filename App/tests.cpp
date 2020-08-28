@@ -1,12 +1,17 @@
+/* newlib facilities */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
+/* std facilities */
 #include <algorithm>
 
-#include "core.hpp"
-#include "atomic.hpp"
-#include "debug.hpp"
+/* LaOS facilities */
+/* I haven't found good solution how to wrap 'C++' for 'C'.
+ * But I definitely saw uglier - touchGFX. */
+#include "../Src/core.hpp"
+#include "../Src/atomic.hpp"
+#include "../Src/debug.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -173,7 +178,6 @@ void privlegedThread(void)
     }
 }
 
-
 void wdgToutTestFunc()
 {
     int loopCounter = 0;
@@ -237,7 +241,7 @@ int test()
     atomicContext2.name = "Atomic context 2";
     atomicContext2.threadLevel = THREAD_UNPRIVILEGED;
     core.Create(atomicContext2);
-#if(0)/*--- Protection tests ---*/
+#if(1)/*--- Protection tests ---*/
     ::LaOS::Context stackOverflowContext;
     stackOverflowContext.threadFunc = stackOverflow;
     stackOverflowContext.name = "Stack overflow context";
@@ -262,10 +266,9 @@ int test()
 #endif
     printf("\r\nStarting core.\r\n");
     core.Start();
-    /* execution returns here after full circle */
+    /* execution never returns here */
     return EXIT_SUCCESS;
 }
-
 #else
 uint32_t stack1[128];
 uint32_t stack2[128];
