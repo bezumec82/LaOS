@@ -37,7 +37,7 @@
 #define THREAD_PRIVILEGED       0x2
 #define MPU_REGIONS_CNT         8
 #define PROTECTION_WORD         0xdeadbeaf
-
+#define MIN_STACK_SIZE          64
 
 extern "C"
 {
@@ -70,12 +70,11 @@ namespace LaOS
          * can be optimized to single-linked */
         struct Context * next; //next is the !second! member of structure
         struct Context * prev;
-
-#if (!PROTECTED_STACK)
-    public :
+#if(PROTECTED_STACK)
+        uint32_t * stackTop;
 #endif
-        size_t stackSize; /*!< Stack size in words */
     public :
+        size_t stackSize; /*!< Stack size in words */
         const char * name;
         ThreadFunc threadFunc;
         uint32_t threadNumber; /*!< Used to find its place in stack pool */

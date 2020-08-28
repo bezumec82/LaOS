@@ -2,8 +2,7 @@
 
 #if PROTECTED_STACK
 __attribute__((section (".unprivileged_stack")))
-uint32_t stackPool[PROTECTION_ZONE_WORDS + \
-    (THREAD_STACK_SIZE_WORDS  + PROTECTION_ZONE_WORDS) * THREAD_AMNT]  \
+uint32_t stackPool[THREADS_STACK_SIZE_WORDS]  \
     __attribute__(( aligned(32) ));
 #endif
 
@@ -62,22 +61,12 @@ Core::Core()
  */
 void Core::Create( Context& context )
 {
-#if(PROTECTED_STACK)
-
-    if(threadCount == THREAD_AMNT)
+    if(context.stackSize <= MIN_STACK_SIZE)
     {
-        PRINT_ERR("Thread amount is bigger than declared.\r\n");
-        return;
-    }
-#else
-    if(context.stackSize == 0) //TODO: less than min necessary amount
-    {
-        PRINTF("Stuck size is too low.\r\n");
+        PRINTF("Stack size is too low.\r\n");
         return;
     }
     ALIGN(context.stackSize);
-#endif
-
     /* Should be done here - 'PrepareStack' is used for restart */
     context.threadNumber = threadCount;
     /* User must provide thread function, name and stack in some config */
@@ -95,19 +84,20 @@ void Core::Create( Context& context )
 void Core::PrepareStack( Context& context )
 {
 #if (PROTECTED_STACK)
+    static uint32_t stackEnd = 0;
     /* The same formula will be used to allocate stack after thread fault */
-    context.stack = &stackPool[0] + PROTECTION_ZONE_WORDS + \
-    (THREAD_STACK_SIZE_WORDS  + PROTECTION_ZONE_WORDS) * context.threadNumber;
-    //Place protection at bottom of stack
-    context.stack[0] = PROTECTION_WORD;
-    context.stackSize = THREAD_STACK_SIZE_WORDS;
+    context.stack = &stackPool[0] + stackEnd + PROTECTION_ZONE_WORDS;
+    //Place protection at bottom of the stack
+    context.stack[0] = PROTECTION_WORD; //Place protection at the top of stack
+    stackEnd = (context.stack + context.stackSize) - &stackPool[0];
+    context.stackTop = &context.stack[0]; //used later to check protection
 #endif //PROTECTED_STACK
 
     /* Descending full stack */
     /* Prepare initial context */
     context.stack = &context.stack[0] + context.stackSize;
 #if (PROTECTED_STACK)
-    //Place protection at top of stack
+    //Place protection at bottom of stack
     context.stack[0] = PROTECTION_WORD;
 #endif
     context.stack--;
@@ -191,21 +181,17 @@ void Core::CheckStack()
     //Check in reverse order - find overflow before corrosion
     for( ;context != &head; context = context->prev)
     {
-        //Check bottom
-        if ( stackPool [ PROTECTION_ZONE_WORDS + \
-            (THREAD_STACK_SIZE_WORDS  + PROTECTION_ZONE_WORDS) * \
-                context->threadNumber ] != PROTECTION_WORD )
+        //Check top
+        if ( * context->stackTop != PROTECTION_WORD )
         {
             PRINT_ERR("Stack overflow in : '%s'\r\n", context->name);
             /* This disables all changes in stack
              * and restore protection symbols */
             PrepareStack(*context);
         }
-        //Check top
-        if( stackPool [ PROTECTION_ZONE_WORDS + \
-            (THREAD_STACK_SIZE_WORDS  + PROTECTION_ZONE_WORDS) * \
-                context->threadNumber + context->stackSize] != PROTECTION_WORD )
-        {
+        //Check bottom
+        if(* (context->stackTop + context->stackSize) != PROTECTION_WORD )
+        { /* Corrosion from overflow from other task */
             PRINT_ERR("Stack corrosion in : %s\r\n", context->name);
             PrepareStack(*context); //whose stack was corroded
             if(context->next != &head)

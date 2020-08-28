@@ -14,21 +14,14 @@
 # define USE_SYSTICK                        true
 #if(USE_SYSTICK)
 # define SYSTICK_PERIOD_MS                  10
-# define PREEMPTIVE_SWITCH                  false
 # define EVENT_DRIVEN_SYSTEM                false
-
-#  if(PREEMPTIVE_SWITCH)&&(EVENT_DRIVEN_SYSTEM)
-#  error "Preemptive switching and event driven system are incompatible."
-#  endif
-
-# endif
+# endif //USE_SYSTICK
 
 # define STATIC_STACK_PROTECTION            true
-# define THREAD_STACK_SIZE_WORDS            256
-/* User should provide information about amount of threads
- * he is willing to create. It it will be declared less threads,
- * then attempt to create extra thread will fail. */
-# define THREAD_AMNT                        16 //overshoot
+/* Summary stack size */
+# define THREADS_STACK_SIZE_WORDS           16384
+/* If stack overflow happens, it flows not immediately to
+ * the stack of other thread, but to the protection zone. */
 # define PROTECTION_ZONE_WORDS              64
 # if (PROTECTION_ZONE_WORDS < 32)
 #  error "Protection zone too low"

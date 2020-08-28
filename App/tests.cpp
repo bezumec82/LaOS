@@ -202,18 +202,21 @@ int test()
     context1.threadFunc = threadFunc1;
     context1.name = "Context 1";
     context1.threadLevel = THREAD_UNPRIVILEGED;
+    context1.stackSize = 128;
     core.Create(context1);
 
     ::LaOS::Context context2;
     context2.threadFunc = threadFunc2;
     context2.name = "Context 2";
     context2.threadLevel = THREAD_UNPRIVILEGED;
+    context2.stackSize = 128;
     core.Create(context2);
 
     ::LaOS::Context floatContext;
     floatContext.threadFunc = threadFuncFloat;
     floatContext.name = "Float context";
     floatContext.threadLevel = THREAD_UNPRIVILEGED;
+    floatContext.stackSize = 256;
     core.Create(floatContext);
 
     ::LaOS::Context privContext;
@@ -222,30 +225,36 @@ int test()
     /* Change for un-privileged and look what happens. */
     //privContext.threadLevel = THREAD_PRIVILEGED;
     privContext.threadLevel = THREAD_PRIVILEGED;
+    privContext.stackSize = 256;
     core.Create(privContext);
 
     ::LaOS::Context allocContext;
     allocContext.threadFunc = allocTestFunc;
     allocContext.name = "Memory allocation context";
     allocContext.threadLevel = THREAD_PRIVILEGED;
+    allocContext.stackSize = 128;
     core.Create(allocContext);
 
     ::LaOS::Context atomicContext1;
     atomicContext1.threadFunc = atomicFunc1;
     atomicContext1.name = "Atomic context 1";
     atomicContext1.threadLevel = THREAD_UNPRIVILEGED;
+    atomicContext1.stackSize = 128;
     core.Create(atomicContext1);
 
     ::LaOS::Context atomicContext2;
     atomicContext2.threadFunc = atomicFunc2;
     atomicContext2.name = "Atomic context 2";
     atomicContext2.threadLevel = THREAD_UNPRIVILEGED;
+    atomicContext2.stackSize = 128;
     core.Create(atomicContext2);
+
 #if(1)/*--- Protection tests ---*/
     ::LaOS::Context stackOverflowContext;
     stackOverflowContext.threadFunc = stackOverflow;
     stackOverflowContext.name = "Stack overflow context";
     stackOverflowContext.threadLevel = THREAD_UNPRIVILEGED;
+    stackOverflowContext.stackSize = 128;
     core.Create(stackOverflowContext);
 #endif
 
@@ -254,6 +263,7 @@ int test()
     memFaultContext.threadFunc = memFaultTestFunc;
     memFaultContext.name = "Memory fault context";
     memFaultContext.threadLevel = THREAD_UNPRIVILEGED;
+    memFaultContext.stackSize = 256;
     core.Create(memFaultContext);
 #endif
 
@@ -262,6 +272,7 @@ int test()
     wdgToutContext.threadFunc = wdgToutTestFunc;
     wdgToutContext.name = "Watchdog byte context";
     wdgToutContext.threadLevel = THREAD_UNPRIVILEGED;
+    wdgToutContext.stackSize = 256;
     core.Create(wdgToutContext);
 #endif
     printf("\r\nStarting core.\r\n");

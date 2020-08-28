@@ -20,7 +20,10 @@ typedef struct {
 void MemManage_Handler(void)
 {
     uint32_t scbCfsr = SCB->CFSR; //snapshot of reg state
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
     uint32_t scbMmfar = SCB->MMFAR;
+#pragma GCC diagnostic pop
     SCB_CFSR * scb_cfsr = (SCB_CFSR *)&(scbCfsr);
     PRINTF( "Instruction access violation (IACCVIOL)  : %lu \r\n"
             "Data access violation (DACCVIOL)         : %lu \r\n"
