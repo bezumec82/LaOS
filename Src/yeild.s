@@ -35,9 +35,9 @@ asmYield:
                         //now context is the next context
 
         /* restore control - first from stack */
-        ldr r3, [r0]    	//dereference context to stack pointer
-        ldr r3, [r3]    	//dereference stack pointer to value
-                        	//last value on stack was control
+        ldr r3, [r0]        //dereference context to stack pointer
+        ldr r3, [r3]        //dereference stack pointer to value
+                            //last value on stack was control
                             //r3 contains control taken from stack
         msr control, r3     //restore control taken from stack
         isb
@@ -74,7 +74,7 @@ asmStart:
 
 
 svcRet:
-	.word svcRet
+    .word svcRet
 
 .global SVC_Handler
 .type SVC_Handler, %function
