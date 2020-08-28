@@ -3,6 +3,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "stm32_hal_crutch.h"
 
 #define UNPRIVILEGED_DATA   __attribute__(( section (".unprivileged_data") ))
 #define UNPRIVILEGED_BSS    __attribute__(( section (".unprivileged_bss") ))
@@ -25,6 +26,7 @@ void copySection(uint32_t * ,
 caddr_t _sbrk(int incr);
 void * upMalloc(size_t size);
 void upFree (void * ptr);
+
 
 /* Tests */
 int test();

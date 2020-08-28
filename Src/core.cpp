@@ -130,10 +130,6 @@ void Core::Start()
 #endif
 
 #if (USE_SYSTICK)
-# if (PREEMPTIVE_SWITCH)
-    NVIC_SetPriority(PendSV_IRQn, 0xFF); // Set PendSV to lowest possible priority
-# endif
-
     uint32_t ticks = (SystemCoreClock / 1000) * SYSTICK_PERIOD_MS;
     if( SysTick_Config(ticks) )
     {

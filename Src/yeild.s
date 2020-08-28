@@ -68,6 +68,7 @@ asmStart:
 
         msr control, r2             //restore control from head stack
         isb
+        dsb
         ldr sp, [r0]                //get new stack pointer
         ldmia sp!, {r3}             //dummy read
         ldmia sp!, {r4-r11, pc}     //switch to the head's context
@@ -107,6 +108,5 @@ SVC_Handler:
         ldr lr, [r1]
 
         bx lr
-
         .align 4
 
