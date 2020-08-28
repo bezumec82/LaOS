@@ -25,7 +25,7 @@ void MemManage_Handler(void)
     uint32_t scbMmfar = SCB->MMFAR;
 #pragma GCC diagnostic pop
     SCB_CFSR * scb_cfsr = (SCB_CFSR *)&(scbCfsr);
-    PRINTF( "Instruction access violation (IACCVIOL)  : %lu \r\n"
+    PRINT_ERR( "Instruction access violation (IACCVIOL)  : %lu \r\n"
             "Data access violation (DACCVIOL)         : %lu \r\n"
             "Unstacking error (MUNSTKERR)             : %lu \r\n"
             "Stacking error (MSTKERR)                 : %lu \r\n"
@@ -39,11 +39,15 @@ void MemManage_Handler(void)
             scb_cfsr->MMARVALID
             );
     if(scb_cfsr->MMARVALID)
-        PRINTF("MMFAR = 0x%lx\r\n", scbMmfar);
+    {
+        PRINT_ERR("MMFAR = 0x%lx\r\n", scbMmfar);
+    }
     else
-        PRINTF("No memory location info.\r\n");
+    {
+        PRINT_ERR("No memory location info.\r\n");
+    }
     ::LaOS::Core& instance = ::LaOS::Core::getInstance();
-    printf("Fault context : %s", instance.current->name);
+    PRINT_ERR("Fault context : %s\r\n", instance.current->name);
     __DMB();
     SCB->AIRCR = SCB_AIRCR_SYSRESETREQ_Msk |
             0x5FAUL << SCB_AIRCR_VECTKEY_Pos;

@@ -258,7 +258,7 @@ int test()
     core.Create(stackOverflowContext);
 #endif
 
-#if(0)
+#if(1)
     ::LaOS::Context memFaultContext;
     memFaultContext.threadFunc = memFaultTestFunc;
     memFaultContext.name = "Memory fault context";

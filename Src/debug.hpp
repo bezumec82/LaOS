@@ -72,9 +72,7 @@ extern "C" {
 #endif
 
 # define PRINT_ERR(text, ...)                                           \
-        printf(RED "%-20.20s %-20.20s #%-5i: ERROR: " text "" NORM,     \
-               __FILE_NAME__, __FUNCTION__, __LINE__,                   \
-               ##__VA_ARGS__);
+        printf(RED "" text "" NORM, ##__VA_ARGS__);
 
 # define PRINT_WARN(text, ...)                                          \
         printf(YEL "%-20.20s %-20.20s #%-5i: WARNING: " text "" NORM,   \
